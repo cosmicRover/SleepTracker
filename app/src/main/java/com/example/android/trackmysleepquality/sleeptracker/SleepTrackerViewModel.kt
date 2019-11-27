@@ -33,12 +33,6 @@ import kotlinx.coroutines.*
 class SleepTrackerViewModel(
         val database: SleepDatabaseDao,
         application: Application) : AndroidViewModel(application) {
-
-    //initializer for this class (viewDidLoad())
-    init {
-        initializeTonight()
-    }
-
     /**co-routines are comprised of a job, scope
      *
      */
@@ -50,6 +44,13 @@ class SleepTrackerViewModel(
 
     //keep track of tonight as mutable live data
     private var tonight = MutableLiveData<SleepNight?>()
+
+    //initializer for this class (viewDidLoad())
+    //note that init is not on the top of the class since
+    //fun initializeTonight() depends on vals declared above
+    init {
+        initializeTonight()
+    }
 
     //get all the data from database
     private val nights = database.getAllNights()
