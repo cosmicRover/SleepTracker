@@ -18,11 +18,13 @@ package com.example.android.trackmysleepquality.sleeptracker
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import com.example.android.trackmysleepquality.database.SleepDatabaseDao
 import com.example.android.trackmysleepquality.database.SleepNight
 import com.example.android.trackmysleepquality.formatNights
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.*
 
 /**
@@ -44,6 +46,19 @@ class SleepTrackerViewModel(
 
     //keep track of tonight as mutable live data
     private var tonight = MutableLiveData<SleepNight?>()
+
+    /**Navigation to SleepQuality fragment setup
+     * making it a mutable live data and private val and use a getter to get it's value from
+     * other classes.
+     */
+
+    private val _navigateToSleepQuality = MutableLiveData<SleepNight>()
+    val navigateToSleepQuality: LiveData<SleepNight> get() = _navigateToSleepQuality //getter for above val
+
+    //reset navigation val
+    fun doneNavigating(){
+        _navigateToSleepQuality.value = null
+    }
 
     //initializer for this class (viewDidLoad())
     //note that init is not on the top of the class since
@@ -101,7 +116,9 @@ class SleepTrackerViewModel(
             val oldNight = tonight.value?: return@launch
             oldNight.endTimeMilli = System.currentTimeMillis()
             update(oldNight)
+            _navigateToSleepQuality.value = oldNight //set the value for live data var
         }
+
     }
 
     private suspend fun update(night: SleepNight){
@@ -114,6 +131,7 @@ class SleepTrackerViewModel(
         uiScope.launch {
             clear()
             tonight.value = null
+            displaySnack()
         }
     }
 
@@ -130,6 +148,31 @@ class SleepTrackerViewModel(
         viewModelJob.cancel()
     }
 
+    /**transformation maps. Turn button visible/invisible based on the state of other vals
+     * they are linked directly to the layout using the viewmodel val there
+     * */
+    val startVisible = Transformations.map(tonight){
+        null == it
+    }
+
+    val stopVisible = Transformations.map(tonight){
+        null != it
+    }
+
+    val clearVisible = Transformations.map(nights){
+        it?.isNotEmpty()
+    }
+
+    private var _snowSnackbar = MutableLiveData<Boolean>()
+    val showSnackbar: LiveData<Boolean> get()= _snowSnackbar
+
+    fun displaySnack(){
+        _snowSnackbar.value = true
+    }
+
+    fun resetSnackbar(){
+        _snowSnackbar.value = false
+    }
 
 }
 
