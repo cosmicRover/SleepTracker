@@ -59,6 +59,10 @@ class SleepTrackerFragment : Fragment() {
                 ViewModelProviders.of(
                         this, viewModelFactory).get(SleepTrackerViewModel::class.java)
 
+        //let fragment know about the adapter
+        val adapter = SleepNightAdapter()
+        binding.sleepList.adapter = adapter
+
         binding.sleepTrackerViewModel = sleepTrackerViewModel
 
         binding.setLifecycleOwner(this)
@@ -97,11 +101,15 @@ class SleepTrackerFragment : Fragment() {
             }
         })
 
-        // TODO (04) Create a new SleepNightAdapter variable,
-        // and bind it to the RecyclerView’s Adapter.
+        /**Bind the view model to observe the data from the adapter using lifeCycleOwner to be life cycle aware*/
+        sleepTrackerViewModel.nights.observe(viewLifecycleOwner, Observer{
+            it?.let {
+                adapter.data = it
+            }
+        })
 
-        // TODO (05) Create an observer on sleepTrackerViewModel.nights that tells
         // the Adapter when there is new data.
+
 
         return binding.root
     }
