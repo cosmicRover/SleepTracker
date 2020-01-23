@@ -104,7 +104,7 @@ class SleepTrackerFragment : Fragment() {
         /**Bind the view model to observe the data from the adapter using lifeCycleOwner to be life cycle aware*/
         sleepTrackerViewModel.nights.observe(viewLifecycleOwner, Observer{
             it?.let {
-                adapter.data = it
+                adapter.submitList(it)/** ListAdapter way of appending items*/
             }
         })
 
